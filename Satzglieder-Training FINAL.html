@@ -1,0 +1,758 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Satzglieder-Training</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600..800&display=swap">
+<style>
+/* Layout: eine Spalte wie ein Arbeitsblatt. Satz oben, darunter immer genau ein Arbeitsschritt (Markieren oder Bestimmen).
+   Markieren sieht aus wie ein Textmarker (gelb), bestimmte Satzglieder bekommen je eine feste Farbe. */
+:root {
+  --bg: #f1f4f9;
+  --surface: #ffffff;
+  --fg: #162033;
+  --muted: #566176;
+  --line: #d6dce8;
+  --ink: #17233f;
+  --ink-fg: #ffffff;
+  --hl: #ffe45c;
+  --hl-fg: #162033;
+  --focus: #2a5fd1;
+  --ok: #17784a;
+  --bad: #b83232;
+  --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --c-S: #c8372f;
+  --c-P: #2a5fd1;
+  --c-Oa: #1f8a4c;
+  --c-Od: #c76400;
+  --c-Og: #7b3fc4;
+  --c-Op: #0a7a85;
+  --c-Pr: #b82f7c;
+  --c-Al: #647515;
+  --c-At: #9a6c00;
+  --c-Am: #7a5a3c;
+  --c-Ak: #4f5d6e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131c; --surface: #161d2a; --fg: #e8ecf4; --muted: #9ba7bb; --line: #2a3447;
+    --ink: #e6ecfa; --ink-fg: #101725; --hl: #e8c93a; --hl-fg: #161b25; --focus: #8fb0ff;
+    --ok: #4cc986; --bad: #ff8a85;
+    --c-S: #ff7b78; --c-P: #6ea2ff; --c-Oa: #4cc986; --c-Od: #ffa14a; --c-Og: #b88bff; --c-Op: #3cc8d4;
+    --c-Pr: #ff72b8; --c-Al: #b3c64a; --c-At: #e3b73a; --c-Am: #c9a27a; --c-Ak: #9fb0c4;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131c; --surface: #161d2a; --fg: #e8ecf4; --muted: #9ba7bb; --line: #2a3447;
+  --ink: #e6ecfa; --ink-fg: #101725; --hl: #e8c93a; --hl-fg: #161b25; --focus: #8fb0ff;
+  --ok: #4cc986; --bad: #ff8a85;
+  --c-S: #ff7b78; --c-P: #6ea2ff; --c-Oa: #4cc986; --c-Od: #ffa14a; --c-Og: #b88bff; --c-Op: #3cc8d4;
+  --c-Pr: #ff72b8; --c-Al: #b3c64a; --c-At: #e3b73a; --c-Am: #c9a27a; --c-Ak: #9fb0c4;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  padding-block: 20px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 46rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1.1rem; text-align: center; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(1.9rem, 6vw, 2.6rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 1.25rem; font-weight: 700; }
+h3 { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.muted { color: var(--muted); }
+
+/* Buttons */
+.btn {
+  appearance: none; cursor: pointer; border: 1.5px solid var(--ink); background: transparent; color: var(--fg);
+  border-radius: 10px; padding: .6rem 1.1rem; min-height: 2.75rem; font-weight: 700;
+}
+.btn.primary { background: var(--lc, var(--ink)); color: var(--surface); border-color: var(--lc, var(--ink)); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn.quiet { border-color: var(--line); font-weight: 400; }
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+
+/* Start */
+.lead { font-size: 1.1rem; color: var(--muted); max-width: 38rem; margin-inline: auto; }
+.hero {
+  position: relative; overflow: hidden; display: flex; flex-direction: column; gap: .8rem; align-items: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 1.9rem 1.1rem 1.5rem;
+}
+.hero::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: 7px;
+  background: var(--lc, var(--c-P));
+}
+.demo { display: flex; flex-wrap: wrap; justify-content: center; gap: .9rem .55rem; font-size: clamp(1.15rem, 4.5vw, 1.5rem); line-height: 1.2; margin-top: .6rem; }
+.dchunk { display: inline-flex; flex-direction: column; align-items: center; }
+.dbox { padding: .4rem .65rem .3rem; border-bottom: 3px solid var(--gc); background: color-mix(in srgb, var(--gc) 16%, var(--surface)); border-radius: 6px 6px 0 0; }
+.how { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .75rem; }
+.how li { display: flex; flex-direction: column; align-items: center; gap: .35rem; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 1rem 1rem 1.1rem; }
+.how li:nth-child(1) .n { background: var(--hl); color: var(--hl-fg); }
+.how li:nth-child(2) .n { background: var(--c-P); color: var(--surface); }
+.how li:nth-child(1) b { background: linear-gradient(transparent 55%, var(--hl) 55%); padding: 0 .3rem; }
+.how li:nth-child(2) b { border-bottom: 3px solid var(--c-P); }
+.how .n, .steps .n {
+  display: inline-grid; place-items: center; width: 1.8rem; height: 1.8rem; border-radius: 50%;
+  background: var(--ink); color: var(--ink-fg); font-weight: 700; font-size: .95rem;
+}
+.how b { font-family: var(--font-display); font-size: 1.1rem; }
+.how span.t { color: var(--muted); max-width: 21rem; font-size: .8rem; line-height: 1.4; }
+.levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.levels li { display: flex; }
+.level {
+  flex: 1; text-align: center; cursor: pointer; background: var(--surface); border: 1.5px solid var(--line);
+  border-radius: 14px; padding: .8rem .9rem; display: flex; flex-direction: column; gap: .15rem; align-items: center;
+}
+.level:hover { border-color: var(--ink); }
+.level .num { font-family: var(--font-display); font-weight: 800; font-size: 2rem; line-height: 1; }
+.level .name { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; line-height: 1.2; margin-top: .2rem; }
+.level .sub { color: var(--muted); font-size: .85rem; line-height: 1.3; }
+.level .best { font-size: .85rem; font-weight: 700; margin-top: auto; padding-top: .5rem; }
+.level .best.none { color: var(--muted); font-weight: 400; }
+.level {
+  background: color-mix(in srgb, var(--lc) 11%, var(--surface));
+  border-color: color-mix(in srgb, var(--lc) 45%, var(--surface));
+  border-top: 6px solid var(--lc);
+}
+.level:hover { border-color: var(--lc); background: color-mix(in srgb, var(--lc) 20%, var(--surface)); }
+.level .num { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--lc); color: var(--surface); font-size: 1.4rem; }
+.level .best.none { color: var(--muted); }
+.chunk { display: inline-flex; flex-direction: column; align-items: center; }
+.cw { display: inline-flex; flex-wrap: wrap; }
+.cap { font: 700 .75rem/1.2 var(--font-body); color: var(--gc); padding: .25rem .5rem 0; white-space: nowrap; align-self: center; }
+.cap.ask { color: var(--fg); padding-bottom: .15rem; }
+.cap.open { color: var(--muted); font-weight: 400; }
+.chunk.target { outline: 2.5px solid var(--ink); outline-offset: 4px; border-radius: 10px; animation: ring 1.6s ease-in-out infinite; }
+@keyframes ring { 50% { outline-color: color-mix(in srgb, var(--ink) 30%, transparent); } }
+.chunk .w:not(:first-child) { border-top-left-radius: 0; border-bottom-left-radius: 0; padding-left: .25rem; }
+.chunk .w:not(:last-child) { border-top-right-radius: 0; border-bottom-right-radius: 0; padding-right: .25rem; }
+details.tips { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: .8rem 1rem; }
+details.tips summary { cursor: pointer; font-weight: 700; }
+details.tips .tipbody { display: grid; gap: .7rem; margin-top: .8rem; text-align: left; }
+details.tips b { font-family: var(--font-display); }
+
+/* Spiel */
+.top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .5rem 1rem; }
+.top .btn { justify-self: start; }
+.top .count { justify-self: end; }
+@media (max-width: 34rem) {
+  .top { grid-template-columns: 1fr 1fr; }
+  .top .title { grid-row: 2; grid-column: 1 / -1; }
+}
+.top .title { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; background: var(--lc); color: var(--surface); border-radius: 99px; padding: .3rem 1rem; justify-self: center; }
+.top .count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--lc, var(--ink)); }
+.card { background: var(--surface); border: 1px solid var(--line); border-top: 7px solid var(--lc, var(--ink)); border-radius: 14px; padding: 1.2rem 1.1rem 1rem; }
+.sentence {
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: .9rem .55rem; font-size: clamp(1.3rem, 5vw, 1.75rem); line-height: 1.15; padding: .2rem 0;
+}
+.w {
+  appearance: none; cursor: pointer; background: transparent; color: var(--fg); border: 0; border-bottom: 3px solid transparent;
+  border-radius: 6px; padding: .4rem .5rem .3rem; min-height: 2.75rem; font: inherit;
+}
+.w:hover:not(:disabled) { background: color-mix(in srgb, var(--fg) 8%, transparent); }
+.w[aria-pressed="true"] { background: var(--hl); color: var(--hl-fg); border-bottom-color: color-mix(in srgb, var(--hl-fg) 40%, var(--hl)); }
+.w:disabled { cursor: default; color: var(--fg); }
+.w.dim:disabled { color: var(--muted); }
+.w.pending:disabled { background: color-mix(in srgb, var(--ink) 12%, var(--surface)); border-bottom-color: var(--ink); }
+.w.marked { background: color-mix(in srgb, var(--ink) 7%, var(--surface)); border-bottom-color: color-mix(in srgb, var(--ink) 45%, var(--surface)); }
+.w.marked:disabled { color: var(--fg); }
+.w.done:disabled { background: color-mix(in srgb, var(--gc) 16%, var(--surface)); border-bottom-color: var(--gc); }
+.w sup { font: 700 .6rem/1 var(--font-body); margin-left: .2rem; color: var(--gc); vertical-align: .6em; }
+/* Konturlinie um das ganze Satzglied statt nur unten */
+.cw.sel { outline: 2px solid color-mix(in srgb, var(--hl-fg) 45%, var(--hl)); border-radius: 6px; }
+.cw.marked { outline: 2px solid color-mix(in srgb, var(--ink) 45%, var(--surface)); border-radius: 6px; }
+.cw.done { outline: 2px solid var(--gc); border-radius: 6px; }
+.cw.sel .w, .cw.marked .w, .cw.done .w, .cw.pend .w { border-bottom-color: transparent; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1.25rem; }
+.steps li {
+  display: flex; align-items: center; gap: .55rem; color: var(--muted); font-weight: 700; padding: .35rem 1rem .35rem .4rem;
+  border: 1.5px solid var(--line); border-radius: 99px; background: var(--surface);
+}
+.steps li.on { color: var(--fg); border-color: var(--lc, var(--ink)); background: color-mix(in srgb, var(--lc, var(--ink)) 12%, var(--surface)); }
+.steps li.done { color: var(--fg); }
+.steps li.done::after { content: "✓"; color: var(--ok); }
+.steps li:nth-child(1) .n { background: var(--hl); color: var(--hl-fg); }
+.steps li:nth-child(2) .n { background: var(--c-P); color: var(--surface); }
+.steps li:not(.on):not(.done) .n { opacity: .45; }
+.panel { display: flex; flex-direction: column; align-items: center; gap: .8rem; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 1rem 1rem 1.1rem; }
+.tgt {
+  display: inline-block; padding: .05rem .6rem; margin-inline: .1rem; border-radius: 8px;
+  outline: 2.5px solid var(--ink); outline-offset: 1px; background: color-mix(in srgb, var(--ink) 10%, var(--surface));
+}
+.panel .q { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+.chosen { background: color-mix(in srgb, var(--hl) 35%, var(--surface)); border-radius: 8px; padding: .4rem .7rem; min-height: 2.4rem; }
+.feedback { border-radius: 10px; padding: .55rem .8rem; border: 1px solid var(--line); background: var(--surface); }
+.feedback.ok { border-color: var(--ok); }
+.feedback.bad { border-color: var(--bad); animation: nudge .28s; }
+.feedback b.k { margin-right: .3rem; }
+.feedback.ok b.k { color: var(--ok); }
+.feedback.bad b.k { color: var(--bad); }
+@keyframes nudge { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+/* Auswahl: Gruppen als Zeilen, links die Gruppenbezeichnung, rechts gleich breite Buttons */
+.cats { display: flex; flex-direction: column; width: 100%; text-align: left; }
+.cat { display: flex; flex-direction: column; gap: .35rem; padding: .35rem 0; }
+.cat h3 { display: flex; align-items: center; gap: .6rem; text-align: left; white-space: nowrap; }
+.cat h3::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.choices { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
+.panel.compact { gap: .5rem; padding: .8rem .9rem .8rem; }
+.panel.compact .choice { padding: .35rem .6rem .35rem .7rem; min-height: 3rem; justify-content: flex-start; border-left: 6px solid var(--gc); }
+.panel.compact .choice b { font-size: .9rem; }
+@media (max-width: 34rem) {
+  .choices { grid-template-columns: 1fr 1fr; gap: .3rem; }
+  .panel.compact .choice { padding: .25rem .5rem .25rem .6rem; }
+  .panel.compact .choice b { font-size: .85rem; }
+  .panel.compact .choice small { font-size: .68rem; }
+  .feedback { padding: .4rem .6rem; font-size: .92rem; }
+}
+.panel.compact .q { font-size: 1.05rem; line-height: 1.3; }
+.panel.compact .hint { display: block; font: 400 .8rem/1.3 var(--font-body); margin-top: .15rem; }
+.panel.compact h3 { font-size: .7rem; }
+.panel.compact .tgt { padding: 0 .45rem; }
+.choice {
+  appearance: none; cursor: pointer; text-align: left; background: color-mix(in srgb, var(--gc) 10%, var(--surface));
+  border: 1.5px solid color-mix(in srgb, var(--gc) 40%, var(--surface)); border-radius: 10px;
+  padding: .3rem .65rem; min-height: 2.75rem; display: flex; align-items: center; justify-content: center; text-align: left; gap: .5rem;
+  flex: 0 1 auto; max-width: 100%;
+}
+.choice b { font-size: .92rem; line-height: 1.2; }
+.choice:hover:not(:disabled) { border-color: var(--gc); background: color-mix(in srgb, var(--gc) 20%, var(--surface)); }
+.choice .dot { width: .8rem; height: .8rem; border-radius: 50%; background: var(--gc); flex: none; }
+.choice b { display: block; font-family: var(--font-display); font-weight: 700; }
+.choice small { display: block; color: var(--muted); font-size: .72rem; line-height: 1.2; }
+.choice:disabled { opacity: .45; cursor: not-allowed; text-decoration: line-through; }
+
+/* Ergebnis */
+.score { color: var(--lc, var(--fg)); font-family: var(--font-display); font-weight: 800; font-size: clamp(3.5rem, 16vw, 5.5rem); line-height: 1; font-variant-numeric: tabular-nums; }
+.todo { list-style: none; padding: 0; margin: 0 auto; width: 100%; max-width: 26rem; display: flex; flex-direction: column; gap: .4rem; }
+.todo li { display: flex; justify-content: space-between; gap: 1rem; padding: .4rem .7rem; border-left: 4px solid var(--gc); background: color-mix(in srgb, var(--gc) 12%, var(--surface)); border-radius: 6px; }
+
+@media (prefers-reduced-motion: reduce) { .feedback.bad, .chunk.target { animation: none; } }
+</style>
+
+<div class="wrap" id="app"></div>
+<div class="sr" id="live" aria-live="polite"></div>
+
+<script>
+/*DATA*/
+const TYPES = {
+  S:  { abbr: 'S',  label: 'Subjekt',                       q: 'Wer oder was?',                    cat: 'Satzkern' },
+  P:  { abbr: 'P',  label: 'Prädikat',                      q: 'Was geschieht? Was wird getan?',   cat: 'Satzkern' },
+  Oa: { abbr: 'Oa', label: 'Akkusativobjekt',               q: 'Wen oder was?',                    cat: 'Objekte' },
+  Od: { abbr: 'Od', label: 'Dativobjekt',                   q: 'Wem?',                             cat: 'Objekte' },
+  Og: { abbr: 'Og', label: 'Genitivobjekt',                 q: 'Wessen?',                          cat: 'Objekte' },
+  Op: { abbr: 'Op', label: 'Präpositionalobjekt',           q: 'Präposition + Frage: Worauf? Über wen?', cat: 'Objekte' },
+  Pr: { abbr: 'Pr', label: 'Prädikativ',                    q: 'Wie oder was ist das Subjekt?',    cat: 'Prädikativ' },
+  Al: { abbr: 'Al', label: 'Adverbiale des Ortes',          q: 'Wo? Wohin? Woher?',                cat: 'Adverbiale Bestimmungen' },
+  At: { abbr: 'At', label: 'Adverbiale der Zeit',           q: 'Wann? Wie lange?',                 cat: 'Adverbiale Bestimmungen' },
+  Am: { abbr: 'Am', label: 'Adverbiale der Art und Weise',  q: 'Wie? Womit?',                      cat: 'Adverbiale Bestimmungen' },
+  Ak: { abbr: 'Ak', label: 'Adverbiale des Grundes',        q: 'Warum? Weshalb?',                  cat: 'Adverbiale Bestimmungen' }
+};
+const CATS = ['Satzkern', 'Objekte', 'Prädikativ', 'Adverbiale Bestimmungen'];
+const LC = { 1: 'P', 2: 'Oa', 3: 'Od', 4: 'Og', 5: 'S' };
+const ALL = ['S', 'P', 'Oa', 'Od', 'Og', 'Op', 'Pr', 'Al', 'At', 'Am', 'Ak'];
+
+/* Schreibweise: {Typ|Wörter}. Taucht derselbe Typ im Satz mehrfach auf, gehören die Teile zu einem getrennten Satzglied. */
+const LEVELS = [
+  {
+    id: 1, name: 'Grundgerüst', sub: 'Subjekt, Prädikat', types: ['S', 'P'], help: true, count: 8,
+    sentences: [
+      '{S|Der Hund} {P|bellt}.',
+      '{S|Die Blumen} {P|blühen}.',
+      '{S|Meine kleine Schwester} {P|schläft}.',
+      '{S|Der Zug} {P|ist angekommen}.',
+      '{S|Die Kinder} {P|haben gelacht}.',
+      '{P|Kommt} {S|der Bus}?',
+      '{P|Hat} {S|der Hund} {P|gebellt}?',
+      '{S|Der alte Mann mit dem Hut} {P|lächelt}.',
+      '{S|Das Baby} {P|weint}.',
+      '{S|Unsere Lehrerin} {P|wird lachen}.',
+      '{S|Es} {P|schneit}.',
+      '{S|Die Vögel auf dem Dach} {P|singen}.',
+      '{S|Anna und Ben} {P|lachen}.',
+      '{S|Der Sturm} {P|hat aufgehört}.',
+      '{S|Der große graue Hund von nebenan} {P|bellt}.',
+      '{S|Die kleinen Kinder in unserer Straße} {P|haben gelacht}.'
+    ]
+  },
+  {
+    id: 2, name: 'Objekte', sub: 'Akkusativ-, Dativobjekt', types: ['S', 'P', 'Oa', 'Od'], help: true, count: 8,
+    sentences: [
+      '{S|Der Hund} {P|jagt} {Oa|die Katze}.',
+      '{S|Mia} {P|schenkt} {Od|ihrer Freundin} {Oa|ein Buch}.',
+      '{S|Der Lehrer} {P|lobt} {Oa|die ganze Klasse}.',
+      '{S|Das Kind} {P|hilft} {Od|der alten Frau}.',
+      '{S|Der Bäcker} {P|backt} {Oa|frische Brötchen}.',
+      '{Oa|Den Ball} {P|wirft} {S|der Torwart}.',
+      '{S|Mein Bruder} {P|hat} {Oa|einen Brief} {P|geschrieben}.',
+      '{S|Die Katze} {P|gehört} {Od|meiner Oma}.',
+      '{S|Der Verkäufer} {P|zeigt} {Od|dem Kunden} {Oa|die neue Jacke}.',
+      '{S|Die Schülerin} {P|dankt} {Od|ihrem Lehrer}.',
+      '{S|Opa} {P|liest} {Od|den Enkeln} {Oa|eine Geschichte} {P|vor}.',
+      '{Od|Dem Nachbarn} {P|gefällt} {S|der neue Garten}.',
+      '{S|Die freundliche Lehrerin} {P|lobt} {Oa|den fleißigen Schüler aus der dritten Reihe}.',
+      '{S|Der nette Briefträger} {P|bringt} {Od|der alten Nachbarin} {Oa|ein großes Paket}.'
+    ]
+  },
+  {
+    id: 3, name: 'Adverbiale', sub: 'Ort, Zeit, Art, Grund', types: ['S', 'P', 'Oa', 'Al', 'At', 'Am', 'Ak'], help: true, count: 8,
+    sentences: [
+      '{S|Die Kinder} {P|spielen} {Al|im Garten}.',
+      '{At|Am Montag} {P|beginnt} {S|die Schule}.',
+      '{S|Der Hund} {P|läuft} {Am|schnell} {Al|durch den Wald}.',
+      '{S|Wir} {P|bleiben} {Ak|wegen des Regens} {Al|zu Hause}.',
+      '{S|Der Bus} {P|fährt} {At|jeden Morgen} {Al|zur Schule}.',
+      '{S|Lena} {P|singt} {Am|leise} {Oa|ein Lied}.',
+      '{At|Gestern} {P|habe} {S|ich} {Oa|einen Film} {Al|im Kino} {P|gesehen}.',
+      '{S|Der Zug} {P|hatte} {Ak|wegen eines Unfalls} {Oa|Verspätung}.',
+      '{S|Die Schüler} {P|schreiben} {At|nächste Woche} {Oa|eine Arbeit}.',
+      '{S|Die Katze} {P|schleicht} {Am|auf leisen Pfoten} {Al|ums Haus}.',
+      '{Al|Auf dem Spielplatz} {P|toben} {S|die Kinder} {At|den ganzen Nachmittag}.',
+      '{S|Er} {P|ist} {Ak|vor Freude} {Al|im Zimmer} {P|herumgesprungen}.',
+      '{S|Ich} {P|gehe} {At|um acht Uhr} {Al|nach Hause}.',
+      '{S|Der Bäcker} {P|steht} {At|früh} {P|auf}.',
+      '{S|Die Kinder aus der Nachbarschaft} {P|spielen} {At|jeden Nachmittag} {Al|auf dem Spielplatz}.',
+      '{S|Mein Bruder} {P|repariert} {At|am Wochenende} {Am|mit viel Geduld} {Oa|sein altes Fahrrad}.'
+    ]
+  },
+  {
+    id: 4, name: 'Alle Satzglieder', sub: 'Alle Typen, mit Fragehilfe', types: ALL, help: true, count: 8,
+    sentences: [
+      '{S|Mein Vater} {P|wartet} {Op|auf den Bus}.',
+      '{S|Wir} {P|sprechen} {Op|über das Wetter}.',
+      '{S|Sie} {P|bittet} {Oa|ihren Bruder} {Op|um Hilfe}.',
+      '{S|Wir} {P|gedenken} {At|heute} {Og|der Verstorbenen}.',
+      '{S|Mein Onkel} {P|ist} {Pr|Lehrer}.',
+      '{S|Der Himmel} {P|wird} {Pr|dunkel}.',
+      '{At|Gegen Abend} {P|wurde} {S|der Regen} {Pr|stärker}.',
+      '{S|Ich} {P|habe} {At|gestern} {Op|auf dich} {P|gewartet}.',
+      '{S|Das Mädchen} {P|erzählt} {Od|ihrer Freundin} {Op|von dem Ausflug}.',
+      '{S|Der Bürgermeister} {P|erinnerte} {Oa|die Bürger} {Op|an die Regeln}.',
+      '{S|Er} {P|fährt} {At|jeden Tag} {Am|mit dem Fahrrad} {Al|zur Arbeit}.',
+      '{At|Am Abend} {P|erzählte} {S|die Oma} {Od|den Kindern} {Oa|ein Märchen}.',
+      '{S|Man} {P|beschuldigte} {Oa|den Mann} {Og|des Diebstahls}.',
+      '{S|Sie} {P|bleibt} {Pr|meine beste Freundin}.',
+      '{S|Sie} {P|denkt} {At|oft} {Op|an ihren Urlaub}.',
+      '{S|Meine Großmutter} {P|erzählt} {At|jeden Abend} {Od|den Enkeln} {Oa|spannende Geschichten} {Al|im Wohnzimmer}.',
+      '{S|Die Eltern} {P|warten} {At|schon seit einer Stunde} {Al|vor der Schule} {Op|auf ihre Kinder}.'
+    ]
+  },
+  {
+    id: 5, name: 'Profi', sub: 'Lange Sätze, ohne Hilfe', types: ALL, help: false, count: 8,
+    sentences: [
+      '{S|Tom} {P|brachte} {Od|seiner Mutter} {At|am Samstag} {Oa|einen Blumenstrauß} {Al|ins Krankenhaus}.',
+      '{S|Die Schüler} {P|warten} {At|seit einer halben Stunde} {Al|vor dem Eingang} {Op|auf ihren Lehrer}.',
+      '{Ak|Wegen des Gewitters} {P|musste} {S|das Spiel} {At|am Nachmittag} {P|abgebrochen werden}.',
+      '{S|Der Chef} {P|hat} {Od|dem neuen Mitarbeiter} {At|gestern} {Am|sehr freundlich} {Oa|die Firma} {P|gezeigt}.',
+      '{S|Meine Tante} {P|ist} {At|seit zehn Jahren} {Pr|Ärztin}.',
+      '{S|Die Nachbarin} {P|erzählte} {Od|mir} {Am|aufgeregt} {Op|von dem Unfall}.',
+      '{Al|Im Wald} {P|haben} {S|die Kinder} {At|am Nachmittag} {Oa|Pilze} {P|gesammelt}.',
+      '{S|Unser Opa} {P|erinnert} {Oa|uns} {At|jeden Abend} {Op|an die Hausaufgaben}.',
+      '{At|Am Abend} {P|wurde} {S|das Wetter} {Am|langsam} {Pr|besser}.',
+      '{S|Die Feuerwehr} {P|fuhr} {Ak|wegen des Brandes} {Am|mit Blaulicht} {Al|zum Hafen}.',
+      '{S|Die Schüler} {P|gedachten} {At|am Sonntag} {Og|der Opfer}.',
+      '{S|Der neue Lehrer} {P|erzählte} {Od|den aufmerksamen Schülern} {At|in der ersten Stunde} {Am|mit großer Begeisterung} {Op|von seiner Reise}.',
+      '{S|Die Gäste} {P|haben} {At|am Abend} {Am|mit großem Appetit} {Oa|das ganze Festmenü} {Al|im Garten} {P|verspeist}.'
+    ]
+  }
+];
+/*END DATA*/
+
+/* ---------- Hilfsfunktionen ---------- */
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function loadBest() { try { return JSON.parse(localStorage.getItem('satzglieder-best') || '{}') || {}; } catch (e) { return {}; } }
+function saveBest(id, pct) { try { const b = loadBest(); if (!(b[id] >= pct)) { b[id] = pct; localStorage.setItem('satzglieder-best', JSON.stringify(b)); } } catch (e) {} }
+
+function parse(src) {
+  const re = /\{([A-Za-z]+#?\d*)\|([^}]+)\}([.?!]?)/g;
+  const words = [], groups = {};
+  let m;
+  while ((m = re.exec(src))) {
+    const key = m[1], type = key.split('#')[0];
+    const ws = m[2].trim().split(/\s+/);
+    if (m[3]) ws[ws.length - 1] += m[3];
+    ws.forEach(t => {
+      const i = words.length;
+      words.push({ t, gid: key });
+      if (!groups[key]) groups[key] = { key, type, idxs: [], found: false, done: false, wrong: new Set() };
+      groups[key].idxs.push(i);
+    });
+  }
+  return { words, groups };
+}
+function groupText(g) {
+  const out = []; let prev = -2;
+  g.idxs.forEach(i => { if (prev >= 0 && i !== prev + 1) out.push('…'); out.push(state.words[i].t); prev = i; });
+  return out.join(' ').replace(/[.?!]$/, '');
+}
+function sortedGroups() { return Object.values(state.groups).sort((a, b) => a.idxs[0] - b.idxs[0]); }
+function sameArr(a, b) { return a.length === b.length && a.every((v, i) => v === b[i]); }
+
+/* ---------- Zustand ---------- */
+const app = document.getElementById('app');
+const live = document.getElementById('live');
+const INTRO = 'Tippe die Wörter an, die zusammen ein Satzglied bilden. Dann auf „Prüfen“.';
+const state = {
+  screen: 'start', best: loadBest(), focus: null, level: null, queue: [], si: 0,
+  words: [], groups: {}, sel: new Set(), phase: 'mark', pending: null, miss: 0, detMiss: 0,
+  pts: { m: 0, d: 0 }, sp: { m: 0, d: 0 }, total: 0, typeMiss: {}, fb: { k: 'info', t: INTRO }
+};
+
+function setFb(k, t) { state.fb = { k, t }; }
+function go() { render(); try { window.scrollTo(0, 0); } catch (e) {} }
+
+/* Sätze nach Länge ordnen und aus jedem Längenabschnitt einen zufällig wählen: kurz am Anfang, länger am Ende. */
+function pickProgressive(L) {
+  const pool = L.sentences.map(s => ({ s, n: parse(s).words.length, r: Math.random() }))
+    .sort((a, b) => a.n - b.n || a.r - b.r);
+  const out = [];
+  for (let k = 0; k < L.count; k++) {
+    const lo = Math.floor(k * pool.length / L.count), hi = Math.max(lo + 1, Math.floor((k + 1) * pool.length / L.count));
+    out.push(pool[lo + Math.floor(Math.random() * (hi - lo))].s);
+  }
+  return out;
+}
+
+function startLevel(id) {
+  const L = LEVELS.find(l => l.id === id);
+  state.level = L;
+  state.queue = pickProgressive(L);
+  state.si = 0; state.pts = { m: 0, d: 0 }; state.total = 0; state.typeMiss = {};
+  state.screen = 'play';
+  loadSentence();
+  go();
+}
+function loadSentence() {
+  const p = parse(state.queue[state.si]);
+  state.words = p.words; state.groups = p.groups;
+  state.sel = new Set(); state.phase = 'mark'; state.pending = null; state.miss = 0; state.detMiss = 0;
+  state.sp = { m: 0, d: 0 };
+  state.total += Object.keys(p.groups).length;
+  setFb('info', INTRO);
+  state.focus = '.w:not(:disabled)';
+}
+
+function onWord(i) {
+  const wg = state.groups[state.words[i].gid];
+  if (state.phase === 'determine') {
+    if (wg.found && !wg.done && state.pending !== wg.key) {
+      state.pending = wg.key;
+      setFb('info', `Welches Satzglied ist „${groupText(wg)}“?`);
+      state.focus = '.choice:not(:disabled)';
+      render();
+    }
+    return;
+  }
+  if (state.phase !== 'mark') return;
+  if (state.sel.has(i)) state.sel.delete(i); else state.sel.add(i);
+  if (state.fb.k === 'bad') setFb('info', INTRO);
+  render();
+}
+function lockGroup(g, clean) {
+  g.found = true; g.dm = 0;
+  state.sel = new Set(); state.miss = 0;
+  if (clean) { state.pts.m++; state.sp.m++; }
+  if (sortedGroups().every(x => x.found)) {
+    state.phase = 'determine'; state.pending = sortedGroups()[0].key;
+    state.focus = '.choice:not(:disabled)';
+  } else {
+    state.focus = '.w:not(:disabled)';
+  }
+}
+function onCheck() {
+  const sel = [...state.sel].sort((a, b) => a - b);
+  if (!sel.length) { setFb('bad', 'Markiere zuerst ein paar Wörter.'); return render(); }
+  const g = Object.values(state.groups).find(x => !x.found && sameArr(x.idxs, sel));
+  if (g) {
+    lockGroup(g, state.miss === 0);
+    setFb('ok', `Richtig abgegrenzt: „${groupText(g)}“. ` + (state.phase === 'determine'
+      ? 'Jetzt bestimmst du sie.'
+      : 'Markiere das nächste Satzglied.'));
+    return render();
+  }
+  state.miss++;
+  const gids = new Set(sel.map(i => state.words[i].gid));
+  let msg;
+  if (gids.size > 1) {
+    msg = 'Hier sind mehrere Satzglieder markiert. Mache die Umstellprobe: Was lässt sich nur gemeinsam verschieben?';
+  } else {
+    const grp = state.groups[[...gids][0]];
+    const contiguous = grp.idxs.every((v, k) => k === 0 || v === grp.idxs[k - 1] + 1);
+    msg = contiguous
+      ? 'Dieses Satzglied ist noch nicht vollständig. Es gehören noch Wörter dazu.'
+      : 'Dieses Satzglied ist noch nicht vollständig. Es kann im Satz getrennt stehen, such nach dem Rest.';
+  }
+  setFb('bad', msg);
+  render();
+}
+function onReveal() {
+  const g = sortedGroups().find(x => !x.found);
+  if (!g) return;
+  lockGroup(g, false);
+  setFb('info', `Diese Wörter bilden ein Satzglied: „${groupText(g)}“. ` + (state.phase === 'determine'
+    ? 'Alle Satzglieder sind markiert. Jetzt bestimmst du sie.'
+    : 'Markiere das nächste Satzglied.'));
+  render();
+}
+function onChoose(type) {
+  const g = state.groups[state.pending];
+  if (!g) return;
+  const T = TYPES[type];
+  if (type === g.type) {
+    if (g.dm === 0) { state.pts.d++; state.sp.d++; }
+    g.done = true;
+    const gs = sortedGroups(), cur = gs.indexOf(g);
+    const nxt = gs.slice(cur + 1).concat(gs.slice(0, cur)).find(x => !x.done);
+    if (nxt) {
+      state.pending = nxt.key; state.phase = 'determine';
+      setFb('ok', `Richtig: „${groupText(g)}“ ist ${T.label}. Weiter mit „${groupText(nxt)}“.`);
+      state.focus = '.choice:not(:disabled)';
+    } else {
+      state.pending = null; state.phase = 'done';
+      setFb('ok', `Richtig: „${groupText(g)}“ ist ${T.label}. Alle Satzglieder sind bestimmt.`);
+      state.focus = '[data-act="next"]';
+    }
+  } else {
+    g.dm++;
+    g.wrong.add(type);
+    if (g.dm === 1) state.typeMiss[g.type] = (state.typeMiss[g.type] || 0) + 1;
+    let t = `${T.label} passt hier nicht.`;
+    if (g.dm >= 2) t += ` Tipp: Die passende Frage lautet „${TYPES[g.type].q}“`;
+    setFb('bad', t);
+    state.focus = '.choice:not(:disabled)';
+  }
+  render();
+}
+function onNext() {
+  if (state.si + 1 >= state.queue.length) return finish();
+  state.si++;
+  loadSentence();
+  go();
+}
+function finish() {
+  const pct = Math.round((state.pts.m + state.pts.d) / (2 * state.total) * 100);
+  state.pct = pct;
+  saveBest(state.level.id, pct);
+  state.best = loadBest();
+  state.screen = 'result';
+  go();
+}
+
+/* ---------- Ansichten ---------- */
+function tipsHTML() {
+  return `<details class="tips"><summary>Tipps: So findest du Satzglieder</summary><div class="tipbody">
+    <p><b>Umstellprobe.</b> Was sich im Satz nur gemeinsam verschieben lässt, ist ein Satzglied. „Gestern | spielten | die Kinder | im Garten.“ wird zu „Im Garten | spielten | die Kinder | gestern.“</p>
+    <p><b>Ersatzprobe.</b> Ein Satzglied kannst du oft durch ein einziges Wort ersetzen. „Der alte Mann“ wird zu „er“.</p>
+    <p><b>Frageprobe.</b> Frage mit dem Prädikat nach dem Satzglied: „Wer oder was spielt?“, „Wo spielen die Kinder?“</p>
+    <p><b>Getrenntes Prädikat.</b> Die Teile des Prädikats stehen oft weit auseinander: „Ich habe gestern auf dich gewartet.“ Sie bilden zusammen ein Satzglied.</p>
+  </div></details>`;
+}
+
+function viewStart() {
+  const demo = [['S', 'Der kleine Hund'], ['P', 'jagt'], ['Oa', 'die Katze'], ['Al', 'im Garten.']].map(([t, x]) =>
+    `<span class="dchunk" style="--gc:var(--c-${t})"><span class="dbox">${x}</span><span class="cap">${TYPES[t].label}</span></span>`).join('');
+  const lv =LEVELS.map(L => {
+    const b = state.best[L.id];
+    return `<li><button class="level" style="--lc:var(--c-${LC[L.id]})" data-act="start" data-level="${L.id}">
+      <span class="num">${L.id}</span>
+      <span class="name">${esc(L.name)}</span>
+      <span class="sub">${esc(L.sub)}</span>
+      <span class="best${b != null ? '' : ' none'}">${b != null ? 'Bestwert ' + b + ' %' : 'Noch nicht gespielt'}</span>
+    </button></li>`;
+  }).join('');
+  return `
+    <header class="hero">
+      <h1>Satzglieder-Training</h1>
+      <p class="lead">Zerlege Sätze in ihre Satzglieder. Zuerst markierst du alle Satzglieder eines Satzes, danach bestimmst du sie.</p>
+      <div class="demo" role="img" aria-label="Beispielsatz: Der kleine Hund (Subjekt) jagt (Prädikat) die Katze (Akkusativobjekt) im Garten (Adverbiale des Ortes)">${demo}</div>
+    </header>
+    <ol class="how">
+      <li><span class="n">A</span><b>Markieren</b><span class="t">Tippe die Wörter an, die zusammen ein Satzglied bilden. Wiederhole das, bis alle Satzglieder des Satzes markiert sind.</span></li>
+      <li><span class="n">B</span><b>Bestimmen</b><span class="t">Wähle für jedes markierte Satzglied aus, um welches es sich handelt.</span></li>
+    </ol>
+    <h2>Stufe wählen</h2>
+    <ul class="levels">${lv}</ul>
+    ${tipsHTML()}`;
+}
+
+function wordHTML(w, i) {
+  const g = state.groups[w.gid];
+  const mark = state.phase === 'mark';
+  let cls = 'w', style = '', dis = false, extra = '';
+  if (g.done) {
+    cls += ' done'; dis = true; style = ` style="--gc:var(--c-${g.type})"`;
+  } else if (state.pending === w.gid) {
+    cls += ' pending'; dis = true;
+  } else if (g.found) {
+    cls += ' marked'; dis = state.phase !== 'determine';
+  } else if (!mark) {
+    dis = true;
+  }
+  const pressed = state.sel.has(i);
+  return `<button class="${cls}"${style} data-act="word" data-i="${i}" data-fk="w${i}" aria-pressed="${pressed}" ${dis ? 'disabled' : ''}>${esc(w.t)}${extra}</button>`;
+}
+
+function sentenceHTML() {
+  const cat = i => {
+    const w = state.words[i];
+    if (state.sel.has(i)) return 'sel';
+    if (state.groups[w.gid].found) return 'g:' + w.gid;
+    return 'w' + i;
+  };
+  let out = '', cur = null, curG = null;
+  const end = () => {
+    if (cur === null) return;
+    out += '</span>';
+    if (curG && curG.done) out += `<span class="cap" style="--gc:var(--c-${curG.type})">${TYPES[curG.type].label}</span>`;
+    else if (curG && state.pending === curG.key) out += '<span class="cap ask">Welches Satzglied?</span>';
+    else if (curG && state.phase === 'determine') out += '<span class="cap open">offen</span>';
+    out += '</span>';
+  };
+  state.words.forEach((w, i) => {
+    const c = cat(i);
+    if (c !== cur) {
+      end();
+      const gg = state.groups[w.gid];
+      const cwc = c === 'sel' ? ' sel' : c.startsWith('g:') ? (gg.done ? ' done' : state.pending === w.gid ? ' pend' : ' marked') : '';
+      const cws = cwc === ' done' ? ` style="--gc:var(--c-${gg.type})"` : '';
+      out += `<span class="chunk${c.startsWith('g:') && state.pending === w.gid ? ' target' : ''}"><span class="cw${cwc}"${cws}>`;
+      cur = c; curG = c.startsWith('g:') ? state.groups[w.gid] : null;
+    }
+    out += wordHTML(w, i);
+  });
+  end();
+  return out;
+}
+
+function viewPlay() {
+  const L = state.level, total = state.queue.length;
+  const gs = sortedGroups();
+  const doneN = gs.filter(g => g.done).length;
+  const frac = (state.si + doneN / gs.length) / total;
+  const ph = state.phase;
+  const stepCls = n => (ph === 'done' ? 'done' : (n === 1 ? (ph === 'mark' ? 'on' : 'done') : (ph === 'determine' ? 'on' : '')));
+
+  let panel = '';
+  if (ph === 'mark') {
+    const txt = [...state.sel].sort((a, b) => a - b).map(i => state.words[i].t).join(' ').replace(/[.?!]$/, '');
+    panel = `
+      <div class="panel">
+        <p class="chosen">${txt ? 'Markiert: <strong>' + esc(txt) + '</strong>' : '<span class="muted">Noch nichts markiert.</span>'}</p>
+        <div class="row">
+          <button class="btn primary" data-act="check" ${state.sel.size ? '' : 'disabled'}>Prüfen</button>
+          <button class="btn quiet" data-act="clear" ${state.sel.size ? '' : 'disabled'}>Auswahl löschen</button>
+          ${state.miss >= 3 ? '<button class="btn quiet" data-act="reveal">Lösung zeigen</button>' : ''}
+        </div>
+        <p class="muted">Gefunden: ${doneN} von ${gs.length} Satzgliedern</p>
+      </div>`;
+  } else if (ph === 'determine') {
+    const g = state.groups[state.pending];
+    const cats = CATS.map(c => {
+      const ts = L.types.filter(t => TYPES[t].cat === c);
+      if (!ts.length) return '';
+      const bs = ts.map(t => `<button class="choice" style="--gc:var(--c-${t})" data-act="choose" data-type="${t}" data-fk="t${t}" ${g.wrong.has(t) ? 'disabled' : ''}>
+          <span><b>${TYPES[t].label}</b>${L.help ? '<small>' + esc(TYPES[t].q) + '</small>' : ''}</span></button>`).join('');
+      return `<section class="cat"><h3>${c}</h3><div class="choices">${bs}</div></section>`;
+    }).join('');
+    const rest = gs.filter(x => !x.done).length;
+    panel = `<div class="panel compact"><p class="sr">Welches Satzglied ist ${esc(groupText(g))}?</p><div class="cats">${cats}</div></div>`;
+  } else {
+    const last = state.si + 1 >= total;
+    panel = `<div class="panel">
+      <p><strong>Satz geschafft.</strong> Ohne Fehler abgegrenzt: ${state.sp.m} von ${gs.length}. Ohne Fehler bestimmt: ${state.sp.d} von ${gs.length}.</p>
+      <div class="row"><button class="btn primary" data-act="next">${last ? 'Ergebnis ansehen' : 'Nächster Satz'}</button></div></div>`;
+  }
+
+  const fbLabel = { ok: 'Richtig.', bad: 'Nein.', info: '' }[state.fb.k];
+
+  return `
+    <div class="top">
+      <button class="btn quiet" data-act="menu">← Stufen</button>
+      <h1 class="title" style="font-size:1.1rem">Stufe ${L.id} · ${esc(L.name)}</h1>
+      <span class="count">Satz ${state.si + 1} von ${total}</span>
+    </div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(frac * 100)}"><i style="width:${(frac * 100).toFixed(1)}%"></i></div>
+    <ol class="steps"><li class="${stepCls(1)}"><span class="n">A</span>Markieren</li><li class="${stepCls(2)}"><span class="n">B</span>Bestimmen</li></ol>
+    <section class="card" aria-label="Satz"><div class="sentence">${sentenceHTML()}</div></section>
+    <p class="feedback ${state.fb.k}">${state.fb.k === 'info' ? '' : '<b class="k">' + fbLabel + '</b>'}${esc(state.fb.t)}</p>
+    ${panel}
+    ${tipsHTML()}`;
+}
+
+function viewResult() {
+  const L = state.level, pct = state.pct, n = state.total;
+  const verdict = pct >= 90 ? 'Sehr sicher' : pct >= 75 ? 'Gut' : pct >= 50 ? 'Auf dem Weg' : 'Noch etwas Übung';
+  const miss = Object.entries(state.typeMiss).sort((a, b) => b[1] - a[1]);
+  const next = LEVELS.find(l => l.id === L.id + 1);
+  const todo = miss.length
+    ? `<section class="panel"><h2>Das übst du noch</h2><ul class="todo">${miss.map(([t, c]) =>
+      `<li style="--gc:var(--c-${t})"><span>${TYPES[t].label}</span><span class="muted">${c} ${c === 1 ? 'Fehler' : 'Fehler'}</span></li>`).join('')}</ul></section>`
+    : '<p>Kein Satzglied wurde falsch bestimmt.</p>';
+  return `
+    <header class="hero">
+      <h1 style="font-size:1.3rem">Stufe ${L.id} · ${esc(L.name)}</h1>
+      <p class="score">${pct} %</p>
+      <p class="lead">${verdict}. Ohne Fehler abgegrenzt: ${state.pts.m} von ${n}. Ohne Fehler bestimmt: ${state.pts.d} von ${n}.</p>
+    </header>
+    ${todo}
+    <div class="row">
+      <button class="btn primary" data-act="start" data-level="${L.id}">Stufe wiederholen</button>
+      ${next ? `<button class="btn" data-act="start" data-level="${next.id}">Weiter zu Stufe ${next.id}</button>` : ''}
+      <button class="btn quiet" data-act="menu">Alle Stufen</button>
+    </div>`;
+}
+
+function render() {
+  if (app.style) app.style.setProperty('--lc', state.screen !== 'start' && state.level ? `var(--c-${LC[state.level.id]})` : 'var(--c-P)');
+  const prev = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.fk : null;
+  app.innerHTML = state.screen === 'start' ? viewStart() : state.screen === 'play' ? viewPlay() : viewResult();
+  if (state.focus) {
+    const el = app.querySelector(state.focus);
+    state.focus = null;
+    if (el) { el.focus({ preventScroll: true }); }
+  } else if (prev) {
+    const el = app.querySelector(`[data-fk="${prev}"]`);
+    if (el && !el.disabled) el.focus({ preventScroll: true });
+  }
+  if (state.screen === 'play') {
+    const t = state.fb.t;
+    live.textContent = '';
+    setTimeout(() => { live.textContent = t; }, 30);
+  }
+}
+
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.disabled) return;
+  const d = b.dataset;
+  switch (d.act) {
+    case 'start': startLevel(+d.level); break;
+    case 'menu': state.screen = 'start'; state.best = loadBest(); go(); break;
+    case 'word': onWord(+d.i); break;
+    case 'check': onCheck(); break;
+    case 'clear': state.sel = new Set(); setFb('info', INTRO); render(); break;
+    case 'reveal': onReveal(); break;
+    case 'choose': onChoose(d.type); break;
+    case 'next': onNext(); break;
+  }
+});
+
+render();
+</script>
+
+</body></html>
